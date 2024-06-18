@@ -19,6 +19,13 @@ cd solidity-contract-generator
 npm install
 ```
 
+## Running on Lilypad 
+
+To run on Lilypad via the CLI: 
+```
+lilypad run https://github.com/Lilypad-Tech/lilypad-module-synthetic-data:0.0.1 -i Contracts=10 -i Seed=42
+```
+
 ## Running the Script
 
 You can run the script directly from the command line or within a Docker container. 
@@ -44,7 +51,7 @@ Run the container with the required environment variables:
 
 ```bash
 # Run the container with environment variables
-docker run --rm -v $(pwd)/contracts:/usr/src/app/contracts -e SEED=myseed -e NUM_CONTRACTS=20 solidity-generator
+docker run -e SEED=myseed -e NUM_CONTRACTS=20 solidity-generator
 ```
 
 ## Environment Variables
@@ -54,4 +61,5 @@ docker run --rm -v $(pwd)/contracts:/usr/src/app/contracts -e SEED=myseed -e NUM
 
 ## Output
 The script creates a ZIP archive named `contracts_<seed>.zip` containing all valid generated contracts.
+
 
