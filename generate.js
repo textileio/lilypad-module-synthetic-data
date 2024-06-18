@@ -245,7 +245,7 @@ function validateContract(contractCode) {
     if (output.errors) {
         for (const error of output.errors) {
             if (error.severity === 'error') {
-                // console.error('Contract validation error:', error);
+                console.error('Contract validation error:', error);
                 return false;
             }
         }
@@ -263,6 +263,10 @@ if (!fs.existsSync('./contracts')) {
     fs.mkdirSync('./contracts');
 }
 
+if (!fs.existsSync('/outputs')) {
+    fs.mkdirSync('/outputs');
+}
+
 const contractFiles = [];
 let validContractsCount = 0;
 
@@ -275,7 +279,7 @@ while (validContractsCount < numberOfContracts) {
         contractFiles.push(filename);
         validContractsCount++;
     } else {
-        // console.error(`Invalid contract generated and skipped: ${filename}`);
+        console.error(`Invalid contract generated and skipped: ${filename}`);
     }
 }
 

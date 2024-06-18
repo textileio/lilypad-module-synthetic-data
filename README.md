@@ -2,23 +2,6 @@
 
 This containerised Lilypad module generates random Solidity contracts and validates them using the Solidity compiler (`solc`). Only validated contracts are included in the final ZIP archive output. If a generated contract contains errors, it is discarded and a new one is generated until the requested number of valid contracts is achieved.
 
-## Prerequisites
-
-Before running the script, ensure you have the following installed:
-
-- Node.js
-- Docker
-
-## Installation
-
-Clone the repository and install the dependencies:
-
-```bash
-git clone https://github.com/your-repo/solidity-contract-generator.git
-cd solidity-contract-generator
-npm install
-```
-
 ## Running on Lilypad 
 
 To run on Lilypad via the CLI: 
@@ -36,7 +19,7 @@ Set the environment variables and run the script:
 
 ```bash
 # Set the environment variables and run the script
-SEED=42 NUM_CONTRACTS=20 node generate.js
+SEED=42 NUM_CONTRACTS=5 node generate.js
 ```
 
 ### Docker
