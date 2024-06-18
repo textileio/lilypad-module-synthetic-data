@@ -1,0 +1,47 @@
+{
+    "machine": {
+        "gpu": 0,
+        "cpu": 1000,
+        "ram": 8000
+    },
+    "job": {
+        "APIVersion": "V1beta1",
+        "Metadata": {
+            "CreatedAt": "2024-06-18T12:32:12Z",
+            "Requester": {}
+        },
+        "Spec": {
+            "Deal": {
+                "Concurrency": 1
+            },
+            "Docker": {
+                "Entrypoint": null,
+                "EnvironmentVariables": [
+                    {{ if .Contracts }}"{{ subst "NUM_CONTRACTS=%s" .Contracts }}",{{ end }}
+                    {{ if .Seed }}"{{ subst "SEED=%s" .Seed }}"{{ end }}
+                ],
+                "Image": "public.ecr.aws/lilypad-network/synthetic_data:0.0.1@sha256:eb3eff2243603a44f57765d18fbe8c64359554b54d15383bfb31ace0fa532f1a"
+            },
+            "Engine": "Docker",
+            "Network": {
+                "Type": "None"
+            },
+            "Outputs": [
+                {
+                "Name": "outputs",
+                "Path": "/outputs"
+                }
+            ],
+            "PublisherSpec": {
+                "Type": "ipfs"
+            },
+            "Resources": {
+                "GPU": "1"
+            },
+            "Timeout": 1800,
+            "Wasm": {
+                "EntryModule": {}
+            }
+        }
+    }
+}
