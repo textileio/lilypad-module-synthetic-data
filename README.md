@@ -23,7 +23,7 @@ npm install
 
 To run on Lilypad via the CLI: 
 ```
-lilypad run https://github.com/Lilypad-Tech/lilypad-module-synthetic-data:0.0.1 -i Contracts=10 -i Seed=42
+lilypad run github.com/Lilypad-Tech/lilypad-module-synthetic-data:0.0.1 -i Contracts=10 -i Seed=42
 ```
 
 ## Running the Script
