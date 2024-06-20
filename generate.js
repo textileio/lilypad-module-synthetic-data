@@ -263,9 +263,9 @@ if (!fs.existsSync('./contracts')) {
     fs.mkdirSync('./contracts');
 }
 
-if (!fs.existsSync('/outputs')) {
-    fs.mkdirSync('/outputs');
-}
+// if (!fs.existsSync('/outputs')) {
+//     fs.mkdirSync('/outputs');
+// }
 
 const contractFiles = [];
 let validContractsCount = 0;
