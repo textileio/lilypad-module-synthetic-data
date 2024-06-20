@@ -245,7 +245,7 @@ function validateContract(contractCode) {
     if (output.errors) {
         for (const error of output.errors) {
             if (error.severity === 'error') {
-                console.error('Contract validation error:', error);
+                // console.error('Contract validation error:', error);
                 return false;
             }
         }
@@ -279,10 +279,10 @@ while (validContractsCount < numberOfContracts) {
         contractFiles.push(filename);
         validContractsCount++;
     } else {
-        console.error(`Invalid contract generated and skipped: ${filename}`);
+        // console.error(`Invalid contract generated and skipped: ${filename}`);
     }
 }
 
-createArchive(outputZipFile, contractFiles)
-    .then(() => console.log(`Contracts archived in ${outputZipFile}`))
-    .catch(err => console.error(`Error creating archive: ${err}`));
+createArchive(outputZipFile, contractFiles);
+    // .then(() => console.log(`Contracts archived in ${outputZipFile}`))
+    // .catch(err => console.error(`Error creating archive: ${err}`));
