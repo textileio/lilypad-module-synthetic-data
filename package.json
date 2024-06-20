@@ -1,18 +1,19 @@
 {
   "name": "synthetic_data",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "A generator for Solidity contracts.",
+  "main": "generate.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node generate.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "DeveloperSteve",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "archiver": "^7.0.1",
     "seedrandom": "^3.0.5",
     "solc": "^0.8.26",
-    "solidity-parser-antlr": "^0.4.11"
+    "fs-extra": "^10.0.0"
   }
 }
