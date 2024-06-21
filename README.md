@@ -29,10 +29,10 @@ Build the Docker image:
 docker build -t solidity-generator .
 ```
 
-Run the container with the required environment variables:
+Run the container with the required environment variables and a mapped `outputs` directory:
 
 ```bash
-docker run -e SEED=myseed -e NUM_CONTRACTS=20 solidity-generator
+docker run -e SEED=42 -e NUM_CONTRACTS=5 -v $(pwd)/outputs:/outputs solidity-generator
 ```
 
 ## Environment Variables
@@ -41,6 +41,6 @@ docker run -e SEED=myseed -e NUM_CONTRACTS=20 solidity-generator
 - `NUM_CONTRACTS`: The number of valid contracts to generate.
 
 ## Output
-The script creates a ZIP archive named `contracts_<seed>.zip` containing all valid generated contracts.
+The script creates a ZIP archive named `contracts_<seed>.zip` containing only valid generated contracts that have been validated using the `solc` library.
 
 

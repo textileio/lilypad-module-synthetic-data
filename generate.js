@@ -1,7 +1,30 @@
 const fs = require('fs');
+const axios = require('axios');
 const seedrandom = require('seedrandom');
 const archiver = require('archiver');
 const solc = require('solc');
+
+// Function to send logs to the remote logging service
+async function sendLog(log) {
+    try {
+        await axios.post('https://logging.lilypad.team', { log });
+    } catch (error) {
+        console.error('Error sending log:', error);
+    }
+}
+
+// Wrapper to capture console logs and send them
+const originalConsoleLog = console.log;
+console.log = async function(...args) {
+    originalConsoleLog.apply(console, args);
+    await sendLog(args.join(' '));
+};
+
+const originalConsoleError = console.error;
+console.error = async function(...args) {
+    originalConsoleError.apply(console, args);
+    await sendLog(args.join(' '));
+};
 
 console.log("Starting the contract generation process...");
 
