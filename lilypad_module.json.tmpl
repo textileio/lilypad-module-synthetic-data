@@ -15,7 +15,11 @@
                 "Concurrency": 1
             },
             "Docker": {
-                "Entrypoint": null,
+                "Entrypoint": [
+                  "/bin/sh",
+                  "-c",
+                  "SEED=${SEED} NUM_CONTRACTS=${NUM_CONTRACTS} node generate.js"
+                ],
                 "EnvironmentVariables": [
                     {{ if .Contracts }}"{{ subst "NUM_CONTRACTS=%s" .Contracts }}",{{else}}"NUM_CONTRACTS=5",{{ end }}
                     {{ if .Seed }}"{{ subst "SEED=%s" .Seed }}"{{else}}"SEED=42"{{ end }}
