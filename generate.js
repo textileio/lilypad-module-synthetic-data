@@ -3,6 +3,8 @@ const seedrandom = require('seedrandom');
 const archiver = require('archiver');
 const solc = require('solc');
 
+console.log("Starting the contract generation process...");
+
 function getRandomInt(rng, max) {
     return Math.floor(rng() * max);
 }
@@ -259,6 +261,9 @@ const numberOfContracts = parseInt(process.env.NUM_CONTRACTS, 10) || 10;
 const outputZipFile = `/outputs/contracts_${seed}.zip`;
 const rng = seedrandom(seed);
 
+console.log(`Using seed: ${seed}`);
+console.log(`Generating ${numberOfContracts} contracts`);
+
 if (!fs.existsSync('./contracts')) {
     fs.mkdirSync('./contracts');
 }
@@ -278,6 +283,7 @@ while (validContractsCount < numberOfContracts) {
         saveContract(contractCode, filename);
         contractFiles.push(filename);
         validContractsCount++;
+        console.log(`Generated valid contract: ${filename}`);
     } else {
         console.error(`Invalid contract generated and skipped: ${filename}`);
     }

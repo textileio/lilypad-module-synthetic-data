@@ -16,7 +16,7 @@
             },
             "Docker": {
                 "Entrypoint": [
-                  "sh",
+                  "/bin/sh",
                   "-c",
                   "SEED=${SEED} NUM_CONTRACTS=${NUM_CONTRACTS} node generate.js"
                 ],
@@ -24,7 +24,7 @@
                     {{ if .Contracts }}"{{ subst "NUM_CONTRACTS=%s" .Contracts }}",{{else}}"NUM_CONTRACTS=5",{{ end }}
                     {{ if .Seed }}"{{ subst "SEED=%s" .Seed }}"{{else}}"SEED=42"{{ end }}
                 ],
-                "Image": "public.ecr.aws/lilypad-network/synthetic_data:0.0.6@sha256:ba44f53b5757cadf22b928e4c496fbeedd1b9b4cc5d9f04354526e87c150bbd3"
+                "Image": "public.ecr.aws/lilypad-network/synthetic_data:0.0.7@sha256:91d01f3809127174238405fc7447f663fb63f6817082a87760ad640a453329e8"
             },
             "Engine": "Docker",
             "Network": {
