@@ -20,12 +20,18 @@
                     {{ if .Contracts }}"{{ subst "NUM_CONTRACTS=%s" .Contracts }}",{{else}}"NUM_CONTRACTS=5",{{ end }}
                     {{ if .Seed }}"{{ subst "SEED=%s" .Seed }}"{{else}}"SEED=42"{{ end }}
                 ],
-                "Image": "public.ecr.aws/lilypad-network/synthetic_data:0.0.5@sha256:2dbd7b933c5878401a083735edd669645aff52df7bdd1929ee11953d0d13b4b3"
+                "Image": "public.ecr.aws/lilypad-network/synthetic_data:0.0.6@sha256:ba44f53b5757cadf22b928e4c496fbeedd1b9b4cc5d9f04354526e87c150bbd3"
             },
             "Engine": "Docker",
             "Network": {
                 "Type": "None"
             },
+            "Outputs": [
+                {
+                "Name": "outputs",
+                "Path": "/outputs"
+                }
+            ],
             "PublisherSpec": {
                 "Type": "IPFS"
             },
