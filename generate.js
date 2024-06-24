@@ -1,48 +1,52 @@
-const fs = require('fs');
-const axios = require('axios');
-const seedrandom = require('seedrandom');
-const archiver = require('archiver');
-const solc = require('solc');
+const fs = require("fs");
+const axios = require("axios");
+const seedrandom = require("seedrandom");
+const archiver = require("archiver");
+const solc = require("solc");
+const ethers = require("ethers");
 
 // Function to send logs to the remote logging service
 async function sendLog(log) {
-    try {
-        await axios.post('https://logging.lilypad.team', { log });
-    } catch (error) {
-        console.error('Error sending log:', error);
-    }
+  try {
+    await axios.post("https://logging.lilypad.team", { log });
+  } catch (error) {
+    console.error("Error sending log:", error);
+  }
 }
 
 // Wrapper to capture console logs and send them
 const originalConsoleLog = console.log;
-console.log = async function(...args) {
-    originalConsoleLog.apply(console, args);
-    await sendLog(args.join(' '));
+console.log = async function (...args) {
+  originalConsoleLog.apply(console, args);
+  await sendLog(args.join(" "));
 };
 
 const originalConsoleError = console.error;
-console.error = async function(...args) {
-    originalConsoleError.apply(console, args);
-    await sendLog(args.join(' '));
+console.error = async function (...args) {
+  originalConsoleError.apply(console, args);
+  await sendLog(args.join(" "));
 };
 
 console.log("Starting the contract generation process...");
 
 function getRandomInt(rng, max) {
-    return Math.floor(rng() * max);
+  return Math.floor(rng() * max);
 }
 
 function getRandomAddress(rng) {
-    return `0x${Math.floor(rng() * 16 ** 40).toString(16).padStart(40, '0')}`;
+  const address = `0x${Math.floor(rng() * 16 ** 40)
+    .toString(16)
+    .padStart(40, "0")}`;
+  return ethers.getAddress(address);
 }
 
 function generateERC20Contract(rng) {
-    const tokenName = `Token${getRandomInt(rng, 10000)}`;
-    const symbol = `TKN${getRandomInt(rng, 100)}`;
-    const totalSupply = getRandomInt(rng, 1e6) + 1e6;
-    const decimals = getRandomInt(rng, 18) + 1;
+  const tokenName = `Token${getRandomInt(rng, 10000)}`;
+  const symbol = `TKN${getRandomInt(rng, 100)}`;
+  const totalSupply = getRandomInt(rng, 1e6) + 1e6;
+  const decimals = getRandomInt(rng, 18) + 1;
 
-    return `
+  return `
     pragma solidity ^0.8.0;
 
     contract ${tokenName} {
@@ -88,11 +92,14 @@ function generateERC20Contract(rng) {
 }
 
 function generateVotingContract(rng) {
-    const proposalCount = getRandomInt(rng, 5) + 1;
-    const proposals = Array.from({ length: proposalCount }, (_, i) => `Proposal${i + 1}`).join(", ");
-    const duration = getRandomInt(rng, 30) + 1;
+  const proposalCount = getRandomInt(rng, 5) + 1;
+  const proposals = Array.from(
+    { length: proposalCount },
+    (_, i) => `Proposal${i + 1}`
+  ).join(", ");
+  const duration = getRandomInt(rng, 30) + 1;
 
-    return `
+  return `
     pragma solidity ^0.8.0;
 
     contract Voting {
@@ -107,7 +114,10 @@ function generateVotingContract(rng) {
 
         constructor() {
             votingDeadline = block.timestamp + ${duration} days;
-            ${proposals.split(", ").map(name => `proposals.push(Proposal("${name}", 0));`).join("\n            ")}
+            ${proposals
+              .split(", ")
+              .map((name) => `proposals.push(Proposal("${name}", 0));`)
+              .join("\n            ")}
         }
 
         function vote(uint256 proposal) public {
@@ -132,59 +142,79 @@ function generateVotingContract(rng) {
 }
 
 function generateCrowdfundingContract(rng) {
-    const goalAmount = getRandomInt(rng, 1e5) + 1e4;
-    const duration = getRandomInt(rng, 30) + 30;
-    const beneficiary = getRandomAddress(rng);
-    const minContribution = getRandomInt(rng, 1e3) + 1;
+  const goalAmount = getRandomInt(rng, 1e5) + 1e4;
+  const duration = getRandomInt(rng, 30) + 30;
+  const beneficiary = getRandomAddress(rng);
+  const minContribution = getRandomInt(rng, 1e3) + 1;
 
-    return `
+  return `
     pragma solidity ^0.8.0;
 
-    contract Crowdfunding {
-        address public beneficiary = ${beneficiary};
-        uint256 public goalAmount = ${goalAmount};
-        uint256 public deadline = block.timestamp + ${duration} days;
-        uint256 public amountRaised;
-        uint256 public minContribution = ${minContribution};
-        mapping(address => uint256) public balanceOf;
+contract Crowdfunding {
+    address public beneficiary = ${beneficiary};
+    uint256 public goalAmount = ${goalAmount};
+    uint256 public deadline = block.timestamp + ${duration} days;
+    uint256 public amountRaised;
+    uint256 public minContribution = ${minContribution};
+    mapping(address => uint256) public balanceOf;
+    address[] public contributors;
 
-        event FundTransfer(address backer, uint256 amount, bool isContribution);
+    event FundTransfer(address backer, uint256 amount, bool isContribution);
 
-        function contribute() public payable {
-            require(block.timestamp < deadline);
-            require(msg.value >= minContribution, "Contribution is below the minimum amount.");
-            balanceOf[msg.sender] += msg.value;
-            amountRaised += msg.value;
-            emit FundTransfer(msg.sender, msg.value, true);
+    constructor(
+        address _beneficiary,
+        uint256 _goalAmount,
+        uint256 _duration,
+        uint256 _minContribution
+    ) {
+        beneficiary = _beneficiary;
+        goalAmount = _goalAmount;
+        deadline = block.timestamp + (_duration * 1 days);
+        minContribution = _minContribution;
+    }
+
+    function contribute() public payable {
+        require(block.timestamp < deadline);
+        require(msg.value >= minContribution, "Contribution is below the minimum amount.");
+        balanceOf[msg.sender] += msg.value;
+        
+        if (balanceOf[msg.sender] == 0) {
+            contributors.push(msg.sender);
         }
+        
+        balanceOf[msg.sender] += msg.value;
+        amountRaised += msg.value;
+        emit FundTransfer(msg.sender, msg.value, true);
+    }
 
-        function checkGoalReached() public {
-            require(block.timestamp >= deadline);
-            if (amountRaised >= goalAmount) {
-                payable(beneficiary).transfer(amountRaised);
-                emit FundTransfer(beneficiary, amountRaised, false);
-            } else {
-                for (uint256 i = 0; i < balanceOf.length; i++) {
-                    address backer = balanceOf[i];
-                    uint256 amount = balanceOf[backer];
-                    if (amount > 0) {
-                        backer.transfer(amount);
-                        balanceOf[backer] = 0;
-                        emit FundTransfer(backer, amount, false);
-                    }
+    function checkGoalReached() public {
+        require(block.timestamp >= deadline);
+        
+        if (amountRaised >= goalAmount) {
+            payable(beneficiary).transfer(amountRaised);
+            emit FundTransfer(beneficiary, amountRaised, false);
+        } else {
+            for (uint256 i = 0; i < contributors.length; i++) {
+                address backer = contributors[i];
+                uint256 amount = balanceOf[backer];
+                if (amount > 0) {
+                    payable(backer).transfer(amount);
+                    balanceOf[backer] = 0;
+                    emit FundTransfer(backer, amount, false);
                 }
             }
         }
     }
+}
     `;
 }
 
 function generateEscrowContract(rng) {
-    const agent = getRandomAddress(rng);
-    const releaseCondition = getRandomInt(rng, 2) === 0 ? "time" : "milestone";
-    const releaseTime = getRandomInt(rng, 365) + 1;
+  const agent = getRandomAddress(rng);
+  const releaseCondition = getRandomInt(rng, 2) === 0 ? "time" : "milestone";
+  const releaseTime = getRandomInt(rng, 365) + 1;
 
-    return `
+  return `
     pragma solidity ^0.8.0;
 
     contract Escrow {
@@ -202,7 +232,11 @@ function generateEscrowContract(rng) {
         }
 
         function withdraw(address payee) public onlyAgent {
-            ${releaseCondition === "time" ? `require(block.timestamp >= ${releaseTime} days, "Cannot withdraw before release time.");` : `// Insert milestone check logic here`}
+            ${
+              releaseCondition === "time"
+                ? `require(block.timestamp >= ${releaseTime} days, "Cannot withdraw before release time.");`
+                : `// Insert milestone check logic here`
+            }
             uint256 payment = deposits[payee];
             deposits[payee] = 0;
             payable(payee).transfer(payment);
@@ -212,106 +246,108 @@ function generateEscrowContract(rng) {
 }
 
 function generateRandomContract(rng) {
-    const contractGenerators = [
-        generateERC20Contract,
-        generateVotingContract,
-        generateCrowdfundingContract,
-        generateEscrowContract
-    ];
+  const contractGenerators = [
+    generateERC20Contract,
+    generateVotingContract,
+    generateCrowdfundingContract,
+    generateEscrowContract,
+  ];
 
-    const randomIndex = getRandomInt(rng, contractGenerators.length);
-    return contractGenerators[randomIndex](rng);
+  const randomIndex = getRandomInt(rng, contractGenerators.length);
+  return contractGenerators[randomIndex](rng);
 }
 
 function saveContract(contractCode, filename) {
-    fs.writeFileSync(filename, contractCode, 'utf8');
+  fs.writeFileSync(filename, contractCode, "utf8");
 }
 
 function createArchive(output, files) {
-    const archive = archiver('zip', {
-        zlib: { level: 9 }
+  const archive = archiver("zip", {
+    zlib: { level: 9 },
+  });
+
+  const outputZip = fs.createWriteStream(output);
+
+  return new Promise((resolve, reject) => {
+    outputZip.on("close", resolve);
+    archive.on("error", reject);
+
+    archive.pipe(outputZip);
+
+    files.forEach((file) => {
+      archive.file(file, { name: file.split("/").pop() });
     });
 
-    const outputZip = fs.createWriteStream(output);
-
-    return new Promise((resolve, reject) => {
-        outputZip.on('close', resolve);
-        archive.on('error', reject);
-
-        archive.pipe(outputZip);
-
-        files.forEach(file => {
-            archive.file(file, { name: file.split('/').pop() });
-        });
-
-        archive.finalize();
-    });
+    archive.finalize();
+  });
 }
 
 function validateContract(contractCode) {
-    const input = {
-        language: 'Solidity',
-        sources: {
-            'Contract.sol': {
-                content: contractCode
-            }
+  const input = {
+    language: "Solidity",
+    sources: {
+      "Contract.sol": {
+        content: contractCode,
+      },
+    },
+    settings: {
+      outputSelection: {
+        "*": {
+          "*": ["*"],
         },
-        settings: {
-            outputSelection: {
-                '*': {
-                    '*': ['*']
-                }
-            }
-        }
-    };
+      },
+    },
+  };
 
-    const output = JSON.parse(solc.compile(JSON.stringify(input)));
+  const output = JSON.parse(solc.compile(JSON.stringify(input)));
 
-    if (output.errors) {
-        for (const error of output.errors) {
-            if (error.severity === 'error') {
-                console.error('Contract validation error:', error);
-                return false;
-            }
-        }
+  if (output.errors) {
+    for (const error of output.errors) {
+      if (error.severity === "error") {
+        console.error("Contract validation error:", error);
+        return false;
+      }
     }
+  }
 
-    return true;
+  return true;
 }
 
-const seed = process.env.SEED || 'default-seed';
+const seed = process.env.SEED || "default-seed";
 const numberOfContracts = parseInt(process.env.NUM_CONTRACTS, 10) || 10;
-const outputZipFile = `/outputs/contracts_${seed}.zip`;
+const outputZipFile = `./outputs/contracts_${seed}.zip`;
 const rng = seedrandom(seed);
 
 console.log(`Using seed: ${seed}`);
 console.log(`Generating ${numberOfContracts} contracts`);
 
-if (!fs.existsSync('./contracts')) {
-    fs.mkdirSync('./contracts');
+if (!fs.existsSync("./contracts")) {
+  fs.mkdirSync("./contracts");
 }
 
-if (!fs.existsSync('/outputs')) {
-    fs.mkdirSync('/outputs');
+if (!fs.existsSync("./outputs")) {
+  fs.mkdirSync("./outputs");
 }
 
 const contractFiles = [];
 let validContractsCount = 0;
 
 while (validContractsCount < numberOfContracts) {
-    const contractCode = generateRandomContract(rng);
-    const filename = `./contracts/${contractCode.match(/contract (\w+)/)[1]}_${validContractsCount}_seed_${seed}.sol`;
-    
-    if (validateContract(contractCode)) {
-        saveContract(contractCode, filename);
-        contractFiles.push(filename);
-        validContractsCount++;
-        console.log(`Generated valid contract: ${filename}`);
-    } else {
-        console.error(`Invalid contract generated and skipped: ${filename}`);
-    }
+  const contractCode = generateRandomContract(rng);
+  const filename = `./contracts/${
+    contractCode.match(/contract (\w+)/)[1]
+  }_${validContractsCount}_seed_${seed}.sol`;
+
+  if (validateContract(contractCode)) {
+    saveContract(contractCode, filename);
+    contractFiles.push(filename);
+    validContractsCount++;
+    console.log(`Generated valid contract: ${filename}`);
+  } else {
+    console.error(`Invalid contract generated and skipped: ${filename}`);
+  }
 }
 
 createArchive(outputZipFile, contractFiles)
-    .then(() => console.log(`Contracts archived in ${outputZipFile}`))
-    .catch(err => console.error(`Error creating archive: ${err}`));
+  .then(() => console.log(`Contracts archived in ${outputZipFile}`))
+  .catch((err) => console.error(`Error creating archive: ${err}`));
